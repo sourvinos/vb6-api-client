@@ -2,13 +2,13 @@ VERSION 5.00
 Object = "{158C2A77-1CCD-44C8-AF42-AA199C5DCC6C}#1.0#0"; "dcButton.ocx"
 Begin VB.Form APIClient 
    Caption         =   "API Destinations"
-   ClientHeight    =   3705
+   ClientHeight    =   4530
    ClientLeft      =   120
    ClientTop       =   450
    ClientWidth     =   8340
    Icon            =   "APIClient.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   3705
+   ScaleHeight     =   4530
    ScaleWidth      =   8340
    StartUpPosition =   2  'CenterScreen
    Begin VB.TextBox txtId 
@@ -101,6 +101,27 @@ Begin VB.Form APIClient
          Strikethrough   =   0   'False
       EndProperty
    End
+   Begin Dacara_dcButton.dcButton cmdCreateXML 
+      Height          =   465
+      Left            =   150
+      TabIndex        =   5
+      Top             =   3075
+      Width           =   1515
+      _ExtentX        =   2672
+      _ExtentY        =   820
+      BackColor       =   14742518
+      ButtonStyle     =   8
+      Caption         =   "Create XML"
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+         Name            =   "MS Sans Serif"
+         Size            =   8.25
+         Charset         =   161
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+   End
 End
 Attribute VB_Name = "APIClient"
 Attribute VB_GlobalNameSpace = False
@@ -129,6 +150,34 @@ Private Sub cmdCreate_Click()
 
 End Sub
 
+Private Sub cmdCreateXML_Click()
+
+    Dim objDom As DOMDocument
+    Dim objRootElem As IXMLDOMElement
+    Dim objMemberElem As IXMLDOMElement
+    Dim objMemberRel As IXMLDOMAttribute
+    Dim objMemberName As IXMLDOMElement
+    
+    Set objDom = New DOMDocument
+    
+    Set objRootElem = objDom.createElement("Family")
+    objDom.appendChild objRootElem
+    
+    Set objMemberElem = objDom.createElement("Member")
+    objRootElem.appendChild objMemberElem
+    
+    Set objMemberRel = objDom.createAttribute("Relationship")
+    objMemberRel.nodeValue = "Father"
+    objMemberElem.setAttributeNode objMemberRel
+    
+    Set objMemberName = objDom.createElement("Name")
+    objMemberElem.appendChild objMemberName
+    objMemberName.Text = "Some Guy"
+    
+    objDom.save ("d:\API Client\Export.xml")
+
+End Sub
+
 Private Sub cmdGetById_Click()
 
     Dim response As String
@@ -139,12 +188,6 @@ Private Sub cmdGetById_Click()
     response = winH.ResponseText
     
     txtResults.Text = response
-
-End Sub
-
-Private Sub cmdLogin_Click()
-
-
 
 End Sub
 
