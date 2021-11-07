@@ -2,13 +2,13 @@ VERSION 5.00
 Object = "{158C2A77-1CCD-44C8-AF42-AA199C5DCC6C}#1.0#0"; "dcButton.ocx"
 Begin VB.Form APIClient 
    Caption         =   "API Destinations"
-   ClientHeight    =   4530
+   ClientHeight    =   3690
    ClientLeft      =   120
    ClientTop       =   450
    ClientWidth     =   8340
    Icon            =   "APIClient.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   4530
+   ScaleHeight     =   3690
    ScaleWidth      =   8340
    StartUpPosition =   2  'CenterScreen
    Begin VB.TextBox txtId 
@@ -153,27 +153,50 @@ End Sub
 Private Sub cmdCreateXML_Click()
 
     Dim objDom As DOMDocument
-    Dim objRootElem As IXMLDOMElement
-    Dim objMemberElem As IXMLDOMElement
-    Dim objMemberRel As IXMLDOMAttribute
-    Dim objMemberName As IXMLDOMElement
+    Dim root As IXMLDOMElement
+    Dim invoice As IXMLDOMElement
+    Dim issuer As IXMLDOMElement
+    Dim address As IXMLDOMElement
+    Dim element As IXMLDOMElement
     
     Set objDom = New DOMDocument
+   
+    'Invoice
+    Set invoice = objDom.createElement("invoice")
+    objDom.appendChild invoice
     
-    Set objRootElem = objDom.createElement("Family")
-    objDom.appendChild objRootElem
+    'Issuer
+    Set issuer = objDom.createElement("issuer")
+    invoice.appendChild issuer
+    Set element = objDom.createElement("vatNumber")
+    issuer.appendChild element
+    element.Text = "099863549"
+    Set element = objDom.createElement("country")
+    issuer.appendChild element
+    element.Text = "GR"
+    Set element = objDom.createElement("branch")
+    issuer.appendChild element
+    element.Text = "0"
+    Set element = objDom.createElement("name")
+    issuer.appendChild element
+    element.Text = " —œ‘”«” Ã.≈.–.≈."
     
-    Set objMemberElem = objDom.createElement("Member")
-    objRootElem.appendChild objMemberElem
-    
-    Set objMemberRel = objDom.createAttribute("Relationship")
-    objMemberRel.nodeValue = "Father"
-    objMemberElem.setAttributeNode objMemberRel
-    
-    Set objMemberName = objDom.createElement("Name")
-    objMemberElem.appendChild objMemberName
-    objMemberName.Text = "Some Guy"
-    
+    'Issuer, address
+    Set address = objDom.createElement("address")
+    issuer.appendChild address
+    Set element = objDom.createElement("street")
+    address.appendChild element
+    element.Text = "≈»Õ… « œƒœ”  ≈— ’—¡” - À≈’ …ÃÃ«”"
+    Set element = objDom.createElement("number")
+    address.appendChild element
+    element.Text = "17A"
+    Set element = objDom.createElement("postalCode")
+    address.appendChild element
+    element.Text = "491 00"
+    Set element = objDom.createElement("city")
+    address.appendChild element
+    element.Text = " ≈— ’—¡"
+       
     objDom.save ("d:\API Client\Export.xml")
 
 End Sub
