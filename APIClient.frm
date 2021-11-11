@@ -154,6 +154,211 @@ Option Explicit
 Private WithEvents winH As WinHttp.WinHttpRequest
 Attribute winH.VB_VarHelpID = -1
 
+
+Private Sub CreateRequestBody(issuerArray, counterPartArray, invoiceHeaderArray, invoiceDetailsArray, invoiceSummaryArray)
+
+    Dim dom As DOMDocument
+    Dim rootElement As IXMLDOMElement
+    Dim objElement As IXMLDOMElement
+    Dim objAttribute As IXMLDOMAttribute
+    
+    Dim root As IXMLDOMElement
+    Dim invoice As IXMLDOMElement
+    Dim issuer As IXMLDOMElement
+    Dim address As IXMLDOMElement
+    Dim element As IXMLDOMElement
+    Dim counterPart As IXMLDOMElement
+    Dim invoiceHeader As IXMLDOMElement
+    Dim invoiceDetails As IXMLDOMElement
+    Dim invoiceSummary As IXMLDOMElement
+    
+    Set dom = New DOMDocument
+    
+    'Creates root element
+    Set rootElement = dom.createElement("InvoicesDoc")
+    dom.appendChild rootElement
+    
+    'Creates Attribute to the Root Element
+    Set objAttribute = dom.createAttribute("xmlns")
+    objAttribute.nodeValue = "http://www.aade.gr/myDATA/invoice/v1.0"
+    rootElement.setAttributeNode objAttribute
+    
+    'Creates Attribute to the Root Element
+    Set objAttribute = dom.createAttribute("xmlns:xsi")
+    objAttribute.nodeValue = "http://www.w3.org/2001/XMLSchema-instance"
+    rootElement.setAttributeNode objAttribute
+    
+    'Creates Attribute to the Root Element
+    Set objAttribute = dom.createAttribute("xsi:schemaLocation")
+    objAttribute.nodeValue = "http://www.aade.gr/my DATA/invoice/v1.0 schema.xsd"
+    rootElement.setAttributeNode objAttribute
+    
+    'Invoice
+    Set invoice = dom.createElement("invoice")
+    rootElement.appendChild invoice
+    
+    'Invoice > Éssuer
+    Set issuer = dom.createElement("issuer")
+    invoice.appendChild issuer
+    
+    Set element = dom.createElement("vatNumber")
+    issuer.appendChild element
+    element.Text = issuerArray(0)
+    Set element = dom.createElement("country")
+    issuer.appendChild element
+    element.Text = issuerArray(1)
+    Set element = dom.createElement("branch")
+    issuer.appendChild element
+    element.Text = issuerArray(2)
+    Set element = dom.createElement("name")
+    issuer.appendChild element
+    element.Text = issuerArray(3)
+    
+    'Invoice > Éssuer > Address
+    Set address = dom.createElement("address")
+    issuer.appendChild address
+    
+    Set element = dom.createElement("street")
+    address.appendChild element
+    element.Text = issuerArray(4)
+    
+    Set element = dom.createElement("number")
+    address.appendChild element
+    element.Text = issuerArray(5)
+    
+    Set element = dom.createElement("postalcode")
+    address.appendChild element
+    element.Text = issuerArray(6)
+    
+    Set element = dom.createElement("city")
+    address.appendChild element
+    element.Text = issuerArray(7)
+    
+    'Invoice > Counterpart
+    Set counterPart = dom.createElement("counterpart")
+    invoice.appendChild counterPart
+    
+    Set element = dom.createElement("vatNumber")
+    counterPart.appendChild element
+    element.Text = counterPartArray(0)
+    Set element = dom.createElement("country")
+    counterPart.appendChild element
+    element.Text = counterPartArray(1)
+    Set element = dom.createElement("branch")
+    counterPart.appendChild element
+    element.Text = counterPartArray(2)
+    Set element = dom.createElement("name")
+    counterPart.appendChild element
+    element.Text = counterPartArray(3)
+    
+    'Invoice > Counterpart > Address
+    Set address = dom.createElement("address")
+    counterPart.appendChild address
+    
+    Set element = dom.createElement("street")
+    address.appendChild element
+    element.Text = counterPartArray(4)
+    
+    Set element = dom.createElement("number")
+    address.appendChild element
+    element.Text = counterPartArray(5)
+    
+    Set element = dom.createElement("postalcode")
+    address.appendChild element
+    element.Text = counterPartArray(6)
+    
+    Set element = dom.createElement("city")
+    address.appendChild element
+    element.Text = counterPartArray(7)
+    
+    'Invoice > InvoiceHeader
+    Set invoiceHeader = dom.createElement("invoiceHeader")
+    invoice.appendChild invoiceHeader
+    
+    Set element = dom.createElement("series")
+    invoiceHeader.appendChild element
+    element.Text = invoiceHeaderArray(0)
+    
+    Set element = dom.createElement("aa")
+    invoiceHeader.appendChild element
+    element.Text = invoiceHeaderArray(1)
+    
+    Set element = dom.createElement("issueDate")
+    invoiceHeader.appendChild element
+    element.Text = invoiceHeaderArray(2)
+    
+    Set element = dom.createElement("invoiceType")
+    invoiceHeader.appendChild element
+    element.Text = invoiceHeaderArray(3)
+    
+    'Invoice > Details
+    
+    Dim detailLine As Integer
+    
+    For detailLine = 0 To UBound(invoiceDetailsArray) - 1
+    
+        Set invoiceDetails = dom.createElement("invoiceDetails")
+        invoice.appendChild invoiceDetails
+        
+        Set element = dom.createElement("lineNumber")
+        invoiceDetails.appendChild element
+        element.Text = invoiceDetailsArray(detailLine, 0)
+        
+        Set element = dom.createElement("netValue")
+        invoiceDetails.appendChild element
+        element.Text = invoiceDetailsArray(detailLine, 1)
+        
+        Set element = dom.createElement("vatCategory")
+        invoiceDetails.appendChild element
+        element.Text = invoiceDetailsArray(detailLine, 2)
+        
+        Set element = dom.createElement("vatAmount")
+        invoiceDetails.appendChild element
+        element.Text = invoiceDetailsArray(detailLine, 3)
+        
+    Next detailLine
+    
+    'Invoice > Summary
+    Set invoiceSummary = dom.createElement("invoiceSummary")
+    invoice.appendChild invoiceSummary
+   
+    Set element = dom.createElement("totalNetValue")
+    invoiceSummary.appendChild element
+    element.Text = invoiceSummaryArray(0)
+    
+    Set element = dom.createElement("totalVatAmount")
+    invoiceSummary.appendChild element
+    element.Text = invoiceSummaryArray(1)
+    
+    Set element = dom.createElement("totalWithheldAmount")
+    invoiceSummary.appendChild element
+    element.Text = invoiceSummaryArray(2)
+    
+    Set element = dom.createElement("totalFeesAmount")
+    invoiceSummary.appendChild element
+    element.Text = invoiceSummaryArray(3)
+    
+    Set element = dom.createElement("totalStampDutyAmount")
+    invoiceSummary.appendChild element
+    element.Text = invoiceSummaryArray(4)
+    
+    Set element = dom.createElement("totalOtherTaxesAmount")
+    invoiceSummary.appendChild element
+    element.Text = invoiceSummaryArray(5)
+    
+    Set element = dom.createElement("totalDeductionsAmount")
+    invoiceSummary.appendChild element
+    element.Text = invoiceSummaryArray(6)
+    
+    Set element = dom.createElement("totalGrossValue")
+    invoiceSummary.appendChild element
+    element.Text = invoiceSummaryArray(7)
+
+    dom.save ("d:\API Client\Export.xml")
+    
+End Sub
+
+
 Private Sub cmdCreate_Click()
 
     Dim myMSXML
@@ -191,108 +396,8 @@ Private Sub cmdCreateMyData_Click()
     
     MsgBox myMSXML.ResponseText
 
-
 End Sub
 
-
-Private Sub cmdCreateXML_Click()
-
-    Dim dom As DOMDocument
-    
-    Dim root As IXMLDOMElement
-    
-    Dim invoice As IXMLDOMElement
-    Dim issuer As IXMLDOMElement
-    Dim counterpart As IXMLDOMElement
-    Dim address As IXMLDOMElement
-    Dim invoiceHeader As IXMLDOMElement
-    
-    Dim element As IXMLDOMElement
-    Dim objAttribute As IXMLDOMAttribute
-    Dim objMemberElem As IXMLDOMElement
-    
-    Set dom = New DOMDocument
-    
-    'Root
-    Set root = dom.createElement("InvoicesDoc")
-    dom.appendChild root
-    Set objAttribute = dom.createAttribute("Relationship")
-    objAttribute.nodeValue = "Father"
-    objMemberElem.setAttributeNode objAttribute
-    'Invoice
-    Set invoice = dom.createElement("invoice")
-    root.appendChild invoice
-    'Invoice > Éssuer
-    Set issuer = dom.createElement("issuer")
-    invoice.appendChild issuer
-    Set element = dom.createElement("vatNumber")
-    issuer.appendChild element
-    element.Text = "099863549"
-    Set element = dom.createElement("country")
-    issuer.appendChild element
-    element.Text = "GR"
-    Set element = dom.createElement("branch")
-    issuer.appendChild element
-    element.Text = "0"
-    Set element = dom.createElement("name")
-    issuer.appendChild element
-    element.Text = "ÊÑÏÔÓÇÓ Ì.Å.Ð.Å."
-    'Invoice > Éssuer > Address
-    Set address = dom.createElement("address")
-    issuer.appendChild address
-    Set element = dom.createElement("street")
-    address.appendChild element
-    element.Text = "ÅÈÍÉÊÇ ÏÄÏÓ ÊÅÑÊÕÑÁÓ - ËÅÕÊÉÌÌÇÓ"
-    Set element = dom.createElement("number")
-    address.appendChild element
-    element.Text = "17A"
-    Set element = dom.createElement("postalCode")
-    address.appendChild element
-    element.Text = "491 00"
-    Set element = dom.createElement("city")
-    address.appendChild element
-    element.Text = "ÊÅÑÊÕÑÁ"
-    'Invoice > Counterpart
-    Set counterpart = dom.createElement("counterpart")
-    invoice.appendChild counterpart
-    Set element = dom.createElement("vatNumber")
-    counterpart.appendChild element
-    element.Text = "99999999"
-    Set element = dom.createElement("country")
-    counterpart.appendChild element
-    element.Text = "EL"
-    Set element = dom.createElement("branch")
-    counterpart.appendChild element
-    element.Text = "1"
-    Set element = dom.createElement("name")
-    counterpart.appendChild element
-    element.Text = "Ç ÅÐÙÍÕÌÉÁ ÔÏÕ ÁËËÏÕ!"
-    'Invoice > CounterPart > Address
-    Set address = dom.createElement("address")
-    counterpart.appendChild address
-    Set element = dom.createElement("street")
-    address.appendChild element
-    element.Text = "ÊÁÂÏÓ"
-    Set element = dom.createElement("number")
-    address.appendChild element
-    element.Text = "-"
-    Set element = dom.createElement("postalCode")
-    address.appendChild element
-    element.Text = "490 84"
-    Set element = dom.createElement("city")
-    address.appendChild element
-    element.Text = "ÊÁÂÏÓ"
-    'Invoice > InvoiceHeader
-    Set invoiceHeader = dom.createElement("invoiceHeader")
-    invoice.appendChild invoiceHeader
-    Set element = dom.createElement("series")
-    invoiceHeader.appendChild element
-    element.Text = "53"
-       
-    Debug.Print dom
-    dom.save ("d:\API Client\Export.xml")
-    
-End Sub
 
 Private Sub cmdGetById_Click()
 
@@ -323,205 +428,60 @@ End Sub
 
 Private Sub dcButton1_Click()
 
-    Dim dom As DOMDocument
-    Dim rootElement As IXMLDOMElement
-    Dim objElement As IXMLDOMElement
-    Dim objAttribute As IXMLDOMAttribute
+    Dim issuerArray(8) As String
     
-    Dim root As IXMLDOMElement
-    Dim invoice As IXMLDOMElement
-    Dim issuer As IXMLDOMElement
-    Dim address As IXMLDOMElement
-    Dim element As IXMLDOMElement
-    Dim counterpart As IXMLDOMElement
-    Dim invoiceHeader As IXMLDOMElement
-    Dim invoiceDetails As IXMLDOMElement
-    Dim invoiceSummary As IXMLDOMElement
+    issuerArray(0) = "099863549"
+    issuerArray(1) = "GR"
+    issuerArray(2) = "0"
+    issuerArray(3) = "ÊÑÏÔÓÇÓ Ì.Å.Ð.Å."
+    issuerArray(4) = "ÅÈÍ. ËÅÕÊÉÌÌÇÓ"
+    issuerArray(5) = "17Á"
+    issuerArray(6) = "491 00"
+    issuerArray(7) = "ÊÅÑÊÕÑÁ"
     
-    Set dom = New DOMDocument
+    Dim counterPart(8) As String
     
-    'Creates root element
-    Set rootElement = dom.createElement("InvoicesDoc")
-    dom.appendChild rootElement
+    counterPart(0) = "0997047490"
+    counterPart(1) = "GR"
+    counterPart(2) = "0"
+    counterPart(3) = "ÃÉÏÕÑÏÍÔÑÁÖÔ ÁÍÙÍÕÌÇ ÅÔÁÉÑÉÁ"
+    counterPart(4) = "ÁÃ. ÁÍÄÑÅÁÓ ÂÁÑÕÐÁÔÁÄÙÍ"
+    counterPart(5) = ""
+    counterPart(6) = ""
+    counterPart(7) = "ÊÅÑÊÕÑÁ"
     
-    'Creates Attribute to the Root Element
-    Set objAttribute = dom.createAttribute("xmlns")
-    objAttribute.nodeValue = "http://www.aade.gr/myDATA/invoice/v1.0"
-    rootElement.setAttributeNode objAttribute
+    Dim invoiceHeader(4) As String
     
-    'Creates Attribute to the Root Element
-    Set objAttribute = dom.createAttribute("xmlns:xsi")
-    objAttribute.nodeValue = "http://www.w3.org/2001/XMLSchema-instance"
-    rootElement.setAttributeNode objAttribute
+    invoiceHeader(0) = ""
+    invoiceHeader(1) = "45"
+    invoiceHeader(2) = "2021-01-01"
+    invoiceHeader(3) = "2.1"
     
-    'Creates Attribute to the Root Element
-    Set objAttribute = dom.createAttribute("xsi:schemaLocation")
-    objAttribute.nodeValue = "http://www.aade.gr/my DATA/invoice/v1.0 schema.xsd"
-    rootElement.setAttributeNode objAttribute
+    Dim invoiceDetails(2, 4) As String
     
-    'Invoice
-    Set invoice = dom.createElement("invoice")
-    rootElement.appendChild invoice
+    invoiceDetails(0, 0) = "1"
+    invoiceDetails(0, 1) = "100"
+    invoiceDetails(0, 2) = "2"
+    invoiceDetails(0, 3) = "24"
     
-    'Invoice > Éssuer
-    Set issuer = dom.createElement("issuer")
-    invoice.appendChild issuer
+    invoiceDetails(1, 0) = "2"
+    invoiceDetails(1, 1) = "50"
+    invoiceDetails(1, 2) = "2"
+    invoiceDetails(1, 3) = "12"
     
-    Set element = dom.createElement("vatNumber")
-    issuer.appendChild element
-    element.Text = "099863549"
-    Set element = dom.createElement("country")
-    issuer.appendChild element
-    element.Text = "GR"
-    Set element = dom.createElement("branch")
-    issuer.appendChild element
-    element.Text = "0"
-    Set element = dom.createElement("name")
-    issuer.appendChild element
-    element.Text = "ÊÑÏÔÓÇÓ Ì.Å.Ð.Å."
+    Dim invoiceSummary(8) As String
     
-    'Invoice > Éssuer > Address
-    Set address = dom.createElement("address")
-    issuer.appendChild address
+    invoiceSummary(0) = "150" 'TotalNetValue
+    invoiceSummary(1) = "36" 'TotalVatAmount
+    invoiceSummary(2) = "0" 'TotalWithheldAmount
+    invoiceSummary(3) = "0" 'TotalFeesAmount
+    invoiceSummary(4) = "0" ''TotalStampDutyAmount
+    invoiceSummary(5) = "0" 'TotalOtherTaxesAmount
+    invoiceSummary(6) = "0" 'TotalDeductionsAmount
+    invoiceSummary(7) = "186" 'TotalGrossValue
     
-    Set element = dom.createElement("street")
-    address.appendChild element
-    element.Text = "ÏÄÏÓ"
+    CreateRequestBody issuerArray, counterPart, invoiceHeader, invoiceDetails, invoiceSummary
     
-    Set element = dom.createElement("number")
-    address.appendChild element
-    element.Text = "74"
-    
-    Set element = dom.createElement("postalcode")
-    address.appendChild element
-    element.Text = "491 00"
-    
-    Set element = dom.createElement("city")
-    address.appendChild element
-    element.Text = "ÊÅÑÊÕÑÁ"
-    
-    'Invoice > Counterpart
-    Set counterpart = dom.createElement("counterpart")
-    invoice.appendChild counterpart
-    
-    Set element = dom.createElement("vatNumber")
-    counterpart.appendChild element
-    element.Text = "099863549"
-    Set element = dom.createElement("country")
-    counterpart.appendChild element
-    element.Text = "GR"
-    Set element = dom.createElement("branch")
-    counterpart.appendChild element
-    element.Text = "0"
-    Set element = dom.createElement("name")
-    counterpart.appendChild element
-    element.Text = "ÊÑÏÔÓÇÓ Ì.Å.Ð.Å."
-    
-    'Invoice > Counterpart > Address
-    Set address = dom.createElement("address")
-    counterpart.appendChild address
-    
-    Set element = dom.createElement("street")
-    address.appendChild element
-    element.Text = "ÏÄÏÓ"
-    
-    Set element = dom.createElement("number")
-    address.appendChild element
-    element.Text = "74"
-    
-    Set element = dom.createElement("postalcode")
-    address.appendChild element
-    element.Text = "491 00"
-    
-    Set element = dom.createElement("city")
-    address.appendChild element
-    element.Text = "ÊÅÑÊÕÑÁ"
-    
-    'Invoice > InvoiceHeader
-    Set invoiceHeader = dom.createElement("invoiceHeader")
-    invoice.appendChild invoiceHeader
-    
-    Set element = dom.createElement("series")
-    invoiceHeader.appendChild element
-    element.Text = "35A"
-    
-    Set element = dom.createElement("aa")
-    invoiceHeader.appendChild element
-    element.Text = "1"
-    
-    Set element = dom.createElement("issueDate")
-    invoiceHeader.appendChild element
-    element.Text = "2021-11-01"
-    
-    Set element = dom.createElement("invoiceType")
-    invoiceHeader.appendChild element
-    element.Text = "2.1"
-    
-    'Invoice > Details
-    Set invoiceDetails = dom.createElement("invoiceDetails")
-    invoice.appendChild invoiceDetails
-   
-    Set element = dom.createElement("lineNumber")
-    invoiceDetails.appendChild element
-    element.Text = "1"
-    
-    Set element = dom.createElement("netValue")
-    invoiceDetails.appendChild element
-    element.Text = "0.00"
-    
-    Set element = dom.createElement("vatCategory")
-    invoiceDetails.appendChild element
-    element.Text = "1"
-    
-    Set element = dom.createElement("vatAmount")
-    invoiceDetails.appendChild element
-    element.Text = "0.00"
-   
-    'Invoice > Summary
-    Set invoiceSummary = dom.createElement("invoiceSummary")
-    invoice.appendChild invoiceSummary
-   
-    Set element = dom.createElement("totalNetValue")
-    invoiceSummary.appendChild element
-    element.Text = "100.00"
-    
-    Set element = dom.createElement("totalVatAmount")
-    invoiceSummary.appendChild element
-    element.Text = "24"
-    
-    Set element = dom.createElement("totalWithheldAmount")
-    invoiceSummary.appendChild element
-    element.Text = "0"
-    
-    Set element = dom.createElement("totalFeesAmount")
-    invoiceSummary.appendChild element
-    element.Text = "0"
-    
-    Set element = dom.createElement("totalStampDutyAmount")
-    invoiceSummary.appendChild element
-    element.Text = "0"
-    
-    Set element = dom.createElement("totalOtherTaxesAmount")
-    invoiceSummary.appendChild element
-    element.Text = "0"
-    
-    Set element = dom.createElement("totalDeductionsAmount")
-    invoiceSummary.appendChild element
-    element.Text = "0"
-    
-    Set element = dom.createElement("totalGrossValue")
-    invoiceSummary.appendChild element
-    element.Text = "124.00"
-   
-    'Saves XML data to disk.
-    'Debug.Print dom.xml
-    
-    dom.save ("d:\API Client\Export.xml")
-    
-End Sub
-
-Private Sub dcButton2_Click()
-
 End Sub
 
 Private Sub Form_Load()

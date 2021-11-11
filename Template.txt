@@ -1,0 +1,21 @@
+InvoicesDoc
+	invoiceHeader
+		series
+		aa
+		issueDate
+		invoiceType
+	invoiceDetails 1...8
+		lineNumber
+		netValue
+		vatCategory
+		vatAmount
+	invoiceSummary
+		totalNetValue
+		totalVatAmount
+		totalWithheldAmount
+		totalFeesAmount
+		totalStampDutyAmount
+		totalOtherTaxesAmount
+		totalDeductionsAmount
+		totalGrossValue
+		
