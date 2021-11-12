@@ -101,7 +101,7 @@ Begin VB.Form APIClient
          Strikethrough   =   0   'False
       EndProperty
    End
-   Begin Dacara_dcButton.dcButton dcButton1 
+   Begin Dacara_dcButton.dcButton createXML 
       Height          =   465
       Left            =   150
       TabIndex        =   5
@@ -155,7 +155,101 @@ Private WithEvents winH As WinHttp.WinHttpRequest
 Attribute winH.VB_VarHelpID = -1
 
 
-Private Sub CreateRequestBody(issuerArray, counterPartArray, invoiceHeaderArray, invoiceDetailsArray, invoiceSummaryArray)
+Private Function CreateCounterPart()
+
+    Dim myArray(8) As String
+    
+    myArray(0) = "0997047490"
+    myArray(1) = "GR"
+    myArray(2) = "0"
+    myArray(3) = "√…œ’—œÕ‘—¡÷‘ ¡ÕŸÕ’Ã« ≈‘¡…—…¡"
+    myArray(4) = "¡√. ¡Õƒ—≈¡” ¬¡—’–¡‘¡ƒŸÕ"
+    myArray(5) = ""
+    myArray(6) = ""
+    myArray(7) = " ≈— ’—¡"
+
+    CreateCounterPart = myArray
+
+End Function
+
+Private Function CreateInvoiceDetails()
+
+    Dim myArray(2, 4) As String
+    
+    myArray(0, 0) = "1" '≈È‰ÔÚ ÔÛ¸ÙÁÙ·Ú: –ﬂÌ·Í·Ú 8.13
+    myArray(0, 1) = "100"
+    myArray(0, 2) = "2"
+    myArray(0, 3) = "24"
+    
+    myArray(1, 0) = "2"
+    myArray(1, 1) = "50"
+    myArray(1, 2) = "2"
+    myArray(1, 3) = "12"
+    
+    CreateInvoiceDetails = myArray
+
+End Function
+
+Private Function CreateInvoiceHeader()
+
+    Dim myArray(4) As String
+    
+    myArray(0) = "-"
+    myArray(1) = "45"
+    myArray(2) = "2021-01-01"
+    myArray(3) = "2.1"
+    
+    CreateInvoiceHeader = myArray
+
+End Function
+
+Private Function CreateInvoiceSummary()
+
+    Dim myArray(8) As String
+    
+    myArray(0) = "150" 'TotalNetValue
+    myArray(1) = "36" 'TotalVatAmount
+    myArray(2) = "0" 'TotalWithheldAmount
+    myArray(3) = "0" 'TotalFeesAmount
+    myArray(4) = "0" ''TotalStampDutyAmount
+    myArray(5) = "0" 'TotalOtherTaxesAmount
+    myArray(6) = "0" 'TotalDeductionsAmount
+    myArray(7) = "186" 'TotalGrossValue
+    
+    CreateInvoiceSummary = myArray
+
+End Function
+
+Private Function CreateIssuer()
+
+    Dim myArray(8) As String
+    
+    myArray(0) = "099863549"
+    myArray(1) = "GR"
+    myArray(2) = "0"
+    myArray(3) = " —œ‘”«” Ã.≈.–.≈."
+    myArray(4) = "≈»Õ. À≈’ …ÃÃ«”"
+    myArray(5) = "17¡"
+    myArray(6) = "491 00"
+    myArray(7) = " ≈— ’—¡"
+    
+    CreateIssuer = myArray
+    
+End Function
+
+Private Function CreatePaymentMethod()
+
+    Dim myArray(2) As String
+    
+    myArray(0) = "1" '‘Ò¸ÔÚ ÎÁÒ˘ÏﬁÚ: –ﬂÌ·Í·Ú 8.12
+    myArray(1) = "124.00"
+    
+    CreatePaymentMethod = myArray
+
+End Function
+
+
+Private Sub CreateRequestBody(issuerArray, counterPartArray, paymentMethodArray, invoiceHeaderArray, invoiceDetailsArray, invoiceSummaryArray)
 
     Dim dom As DOMDocument
     Dim rootElement As IXMLDOMElement
@@ -169,6 +263,7 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, invoiceHeaderArray,
     Dim element As IXMLDOMElement
     Dim counterPart As IXMLDOMElement
     Dim invoiceHeader As IXMLDOMElement
+    Dim invoicePaymentMethod As IXMLDOMElement
     Dim invoiceDetails As IXMLDOMElement
     Dim invoiceSummary As IXMLDOMElement
     
@@ -200,7 +295,6 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, invoiceHeaderArray,
     'Invoice > …ssuer
     Set issuer = dom.createElement("issuer")
     invoice.appendChild issuer
-    
     Set element = dom.createElement("vatNumber")
     issuer.appendChild element
     element.Text = issuerArray(0)
@@ -217,19 +311,15 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, invoiceHeaderArray,
     'Invoice > …ssuer > Address
     Set address = dom.createElement("address")
     issuer.appendChild address
-    
     Set element = dom.createElement("street")
     address.appendChild element
     element.Text = issuerArray(4)
-    
     Set element = dom.createElement("number")
     address.appendChild element
     element.Text = issuerArray(5)
-    
     Set element = dom.createElement("postalcode")
     address.appendChild element
     element.Text = issuerArray(6)
-    
     Set element = dom.createElement("city")
     address.appendChild element
     element.Text = issuerArray(7)
@@ -237,7 +327,6 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, invoiceHeaderArray,
     'Invoice > Counterpart
     Set counterPart = dom.createElement("counterpart")
     invoice.appendChild counterPart
-    
     Set element = dom.createElement("vatNumber")
     counterPart.appendChild element
     element.Text = counterPartArray(0)
@@ -254,106 +343,93 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, invoiceHeaderArray,
     'Invoice > Counterpart > Address
     Set address = dom.createElement("address")
     counterPart.appendChild address
-    
     Set element = dom.createElement("street")
     address.appendChild element
     element.Text = counterPartArray(4)
-    
     Set element = dom.createElement("number")
     address.appendChild element
     element.Text = counterPartArray(5)
-    
     Set element = dom.createElement("postalcode")
     address.appendChild element
     element.Text = counterPartArray(6)
-    
     Set element = dom.createElement("city")
     address.appendChild element
     element.Text = counterPartArray(7)
     
-    'Invoice > InvoiceHeader
+    'Invoice > Invoice header
     Set invoiceHeader = dom.createElement("invoiceHeader")
     invoice.appendChild invoiceHeader
-    
     Set element = dom.createElement("series")
     invoiceHeader.appendChild element
     element.Text = invoiceHeaderArray(0)
-    
     Set element = dom.createElement("aa")
     invoiceHeader.appendChild element
     element.Text = invoiceHeaderArray(1)
-    
     Set element = dom.createElement("issueDate")
     invoiceHeader.appendChild element
     element.Text = invoiceHeaderArray(2)
-    
     Set element = dom.createElement("invoiceType")
     invoiceHeader.appendChild element
     element.Text = invoiceHeaderArray(3)
     
+    'Invoice > Payment method
+    Set invoicePaymentMethod = dom.createElement("invoicePaymentMethod")
+    invoice.appendChild invoicePaymentMethod
+    Set element = dom.createElement("type")
+    invoicePaymentMethod.appendChild element
+    element.Text = paymentMethodArray(0)
+    Set element = dom.createElement("amount")
+    invoicePaymentMethod.appendChild element
+    element.Text = paymentMethodArray(1)
+    
     'Invoice > Details
-    
     Dim detailLine As Integer
-    
     For detailLine = 0 To UBound(invoiceDetailsArray) - 1
-    
         Set invoiceDetails = dom.createElement("invoiceDetails")
         invoice.appendChild invoiceDetails
-        
         Set element = dom.createElement("lineNumber")
         invoiceDetails.appendChild element
         element.Text = invoiceDetailsArray(detailLine, 0)
-        
         Set element = dom.createElement("netValue")
         invoiceDetails.appendChild element
         element.Text = invoiceDetailsArray(detailLine, 1)
-        
         Set element = dom.createElement("vatCategory")
         invoiceDetails.appendChild element
         element.Text = invoiceDetailsArray(detailLine, 2)
-        
         Set element = dom.createElement("vatAmount")
         invoiceDetails.appendChild element
         element.Text = invoiceDetailsArray(detailLine, 3)
-        
     Next detailLine
     
     'Invoice > Summary
     Set invoiceSummary = dom.createElement("invoiceSummary")
     invoice.appendChild invoiceSummary
-   
     Set element = dom.createElement("totalNetValue")
     invoiceSummary.appendChild element
     element.Text = invoiceSummaryArray(0)
-    
     Set element = dom.createElement("totalVatAmount")
     invoiceSummary.appendChild element
     element.Text = invoiceSummaryArray(1)
-    
     Set element = dom.createElement("totalWithheldAmount")
     invoiceSummary.appendChild element
     element.Text = invoiceSummaryArray(2)
-    
     Set element = dom.createElement("totalFeesAmount")
     invoiceSummary.appendChild element
     element.Text = invoiceSummaryArray(3)
-    
     Set element = dom.createElement("totalStampDutyAmount")
     invoiceSummary.appendChild element
     element.Text = invoiceSummaryArray(4)
-    
     Set element = dom.createElement("totalOtherTaxesAmount")
     invoiceSummary.appendChild element
     element.Text = invoiceSummaryArray(5)
-    
     Set element = dom.createElement("totalDeductionsAmount")
     invoiceSummary.appendChild element
     element.Text = invoiceSummaryArray(6)
-    
     Set element = dom.createElement("totalGrossValue")
     invoiceSummary.appendChild element
     element.Text = invoiceSummaryArray(7)
 
+    'Export
     dom.save ("d:\API Client\Export.xml")
     
 End Sub
@@ -426,63 +502,18 @@ Private Sub cmdGet_Click()
 
 End Sub
 
-Private Sub dcButton1_Click()
+Private Sub createXML_Click()
 
-    Dim issuerArray(8) As String
-    
-    issuerArray(0) = "099863549"
-    issuerArray(1) = "GR"
-    issuerArray(2) = "0"
-    issuerArray(3) = " —œ‘”«” Ã.≈.–.≈."
-    issuerArray(4) = "≈»Õ. À≈’ …ÃÃ«”"
-    issuerArray(5) = "17¡"
-    issuerArray(6) = "491 00"
-    issuerArray(7) = " ≈— ’—¡"
-    
-    Dim counterPart(8) As String
-    
-    counterPart(0) = "0997047490"
-    counterPart(1) = "GR"
-    counterPart(2) = "0"
-    counterPart(3) = "√…œ’—œÕ‘—¡÷‘ ¡ÕŸÕ’Ã« ≈‘¡…—…¡"
-    counterPart(4) = "¡√. ¡Õƒ—≈¡” ¬¡—’–¡‘¡ƒŸÕ"
-    counterPart(5) = ""
-    counterPart(6) = ""
-    counterPart(7) = " ≈— ’—¡"
-    
-    Dim invoiceHeader(4) As String
-    
-    invoiceHeader(0) = ""
-    invoiceHeader(1) = "45"
-    invoiceHeader(2) = "2021-01-01"
-    invoiceHeader(3) = "2.1"
-    
-    Dim invoiceDetails(2, 4) As String
-    
-    invoiceDetails(0, 0) = "1"
-    invoiceDetails(0, 1) = "100"
-    invoiceDetails(0, 2) = "2"
-    invoiceDetails(0, 3) = "24"
-    
-    invoiceDetails(1, 0) = "2"
-    invoiceDetails(1, 1) = "50"
-    invoiceDetails(1, 2) = "2"
-    invoiceDetails(1, 3) = "12"
-    
-    Dim invoiceSummary(8) As String
-    
-    invoiceSummary(0) = "150" 'TotalNetValue
-    invoiceSummary(1) = "36" 'TotalVatAmount
-    invoiceSummary(2) = "0" 'TotalWithheldAmount
-    invoiceSummary(3) = "0" 'TotalFeesAmount
-    invoiceSummary(4) = "0" ''TotalStampDutyAmount
-    invoiceSummary(5) = "0" 'TotalOtherTaxesAmount
-    invoiceSummary(6) = "0" 'TotalDeductionsAmount
-    invoiceSummary(7) = "186" 'TotalGrossValue
-    
-    CreateRequestBody issuerArray, counterPart, invoiceHeader, invoiceDetails, invoiceSummary
-    
+    CreateRequestBody _
+        CreateIssuer, _
+        CreateCounterPart, _
+        CreatePaymentMethod, _
+        CreateInvoiceHeader, _
+        CreateInvoiceDetails, _
+        CreateInvoiceSummary
+
 End Sub
+
 
 Private Sub Form_Load()
 
