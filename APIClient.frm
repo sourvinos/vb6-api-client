@@ -159,11 +159,11 @@ Private Function CreateCounterPart()
 
     Dim myArray(8) As String
     
-    myArray(0) = "0997047490"
+    myArray(0) = "000000000"
     myArray(1) = "GR"
     myArray(2) = "0"
-    myArray(3) = "ÃÉÏÕÑÏÍÔÑÁÖÔ ÁÍÙÍÕÌÇ ÅÔÁÉÑÉÁ"
-    myArray(4) = "ÁÃ. ÁÍÄÑÅÁÓ ÂÁÑÕÐÁÔÁÄÙÍ"
+    myArray(3) = "ÅÐÙÍÕÌÉÁ"
+    myArray(4) = "ÄÉÅÕÈÕÍÓÇ"
     myArray(5) = ""
     myArray(6) = ""
     myArray(7) = "ÊÅÑÊÕÑÁ"
@@ -174,17 +174,13 @@ End Function
 
 Private Function CreateInvoiceDetails()
 
-    Dim myArray(2, 4) As String
+    Dim myArray(1, 5) As String
     
-    myArray(0, 0) = "1" 'Åéäïò ðïóüôçôáò: Ðßíáêáò 8.13
-    myArray(0, 1) = "100"
-    myArray(0, 2) = "2"
-    myArray(0, 3) = "24"
-    
-    myArray(1, 0) = "2"
-    myArray(1, 1) = "50"
-    myArray(1, 2) = "2"
-    myArray(1, 3) = "12"
+    myArray(0, 0) = "1" 'Á/Á ãñáììÞò
+    myArray(0, 1) = "1" 'ÊáèáñÞ áîßá
+    myArray(0, 2) = "5" 'Êáôçãïñßá ÖÐÁ
+    myArray(0, 3) = "2.4" 'Ðïóü ÖÐÁ
+    myArray(0, 4) = "E3_106" 'Êùäéêüò ÷áñáêôçñéóìïý
     
     CreateInvoiceDetails = myArray
 
@@ -192,12 +188,13 @@ End Function
 
 Private Function CreateInvoiceHeader()
 
-    Dim myArray(4) As String
+    Dim myArray(5) As String
     
-    myArray(0) = "-"
-    myArray(1) = "45"
-    myArray(2) = "2021-01-01"
-    myArray(3) = "2.1"
+    myArray(0) = "-" 'ÓåéñÜ
+    myArray(1) = "1" 'Íï ðáñáóôáôéêïý
+    myArray(2) = "2021-01-01" 'Çìåñïìçíßá
+    myArray(3) = "2.1" 'Ôýðïò ðáñáóôáôéêïý
+    myArray(4) = "EUR"
     
     CreateInvoiceHeader = myArray
 
@@ -207,14 +204,14 @@ Private Function CreateInvoiceSummary()
 
     Dim myArray(8) As String
     
-    myArray(0) = "150" 'TotalNetValue
-    myArray(1) = "36" 'TotalVatAmount
+    myArray(0) = "1" 'TotalNetValue
+    myArray(1) = "0.24" 'TotalVatAmount
     myArray(2) = "0" 'TotalWithheldAmount
     myArray(3) = "0" 'TotalFeesAmount
     myArray(4) = "0" ''TotalStampDutyAmount
     myArray(5) = "0" 'TotalOtherTaxesAmount
     myArray(6) = "0" 'TotalDeductionsAmount
-    myArray(7) = "186" 'TotalGrossValue
+    myArray(7) = "1.24" 'TotalGrossValue
     
     CreateInvoiceSummary = myArray
 
@@ -249,7 +246,18 @@ Private Function CreatePaymentMethod()
 End Function
 
 
-Private Sub CreateRequestBody(issuerArray, counterPartArray, paymentMethodArray, invoiceHeaderArray, invoiceDetailsArray, invoiceSummaryArray)
+Private Function CreatePaymentMethodDetails()
+
+    Dim myArray(1) As String
+    
+    myArray(0) = "3" 'Ðßíáêáò 8,12
+    myArray(1) = "1.24" 'Ðïóü
+    
+    CreatePaymentMethodDetails = myArray
+
+End Function
+
+Private Function CreateRequestBody(issuerArray, counterPartArray, paymentMethodArray, paymentMethodDetailsArray, invoiceHeaderArray, invoiceDetailsArray, invoiceSummaryArray)
 
     Dim dom As DOMDocument
     Dim rootElement As IXMLDOMElement
@@ -264,7 +272,10 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, paymentMethodArray,
     Dim counterPart As IXMLDOMElement
     Dim invoiceHeader As IXMLDOMElement
     Dim invoicePaymentMethod As IXMLDOMElement
+    Dim invoicePaymentMethodDetails As IXMLDOMElement
     Dim invoiceDetails As IXMLDOMElement
+    Dim incomeClassifications As IXMLDOMElement
+    
     Dim invoiceSummary As IXMLDOMElement
     
     Set dom = New DOMDocument
@@ -317,7 +328,7 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, paymentMethodArray,
     Set element = dom.createElement("number")
     address.appendChild element
     element.Text = issuerArray(5)
-    Set element = dom.createElement("postalcode")
+    Set element = dom.createElement("postalCode")
     address.appendChild element
     element.Text = issuerArray(6)
     Set element = dom.createElement("city")
@@ -349,7 +360,7 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, paymentMethodArray,
     Set element = dom.createElement("number")
     address.appendChild element
     element.Text = counterPartArray(5)
-    Set element = dom.createElement("postalcode")
+    Set element = dom.createElement("postalCode")
     address.appendChild element
     element.Text = counterPartArray(6)
     Set element = dom.createElement("city")
@@ -371,34 +382,54 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, paymentMethodArray,
     Set element = dom.createElement("invoiceType")
     invoiceHeader.appendChild element
     element.Text = invoiceHeaderArray(3)
+    Set element = dom.createElement("currency")
+    invoiceHeader.appendChild element
+    element.Text = invoiceHeaderArray(4)
     
     'Invoice > Payment method
-    Set invoicePaymentMethod = dom.createElement("invoicePaymentMethod")
+    Set invoicePaymentMethod = dom.createElement("paymentMethods")
     invoice.appendChild invoicePaymentMethod
-    Set element = dom.createElement("type")
-    invoicePaymentMethod.appendChild element
-    element.Text = paymentMethodArray(0)
-    Set element = dom.createElement("amount")
-    invoicePaymentMethod.appendChild element
-    element.Text = paymentMethodArray(1)
     
+    'Invoice > Payment method > Details
+    Set invoicePaymentMethodDetails = dom.createElement("paymentMethodDetails")
+    invoicePaymentMethod.appendChild invoicePaymentMethodDetails
+    Set element = dom.createElement("type")
+    invoicePaymentMethodDetails.appendChild element
+    element.Text = paymentMethodDetailsArray(0)
+    Set element = dom.createElement("amount")
+    invoicePaymentMethodDetails.appendChild element
+    element.Text = paymentMethodDetailsArray(1)
+        
     'Invoice > Details
     Dim detailLine As Integer
     For detailLine = 0 To UBound(invoiceDetailsArray) - 1
+        
         Set invoiceDetails = dom.createElement("invoiceDetails")
         invoice.appendChild invoiceDetails
+        
         Set element = dom.createElement("lineNumber")
         invoiceDetails.appendChild element
         element.Text = invoiceDetailsArray(detailLine, 0)
+        
         Set element = dom.createElement("netValue")
         invoiceDetails.appendChild element
         element.Text = invoiceDetailsArray(detailLine, 1)
+        
         Set element = dom.createElement("vatCategory")
         invoiceDetails.appendChild element
         element.Text = invoiceDetailsArray(detailLine, 2)
+        
         Set element = dom.createElement("vatAmount")
         invoiceDetails.appendChild element
         element.Text = invoiceDetailsArray(detailLine, 3)
+        
+        Set incomeClassifications = dom.createElement("incomeClassification")
+        invoiceDetails.appendChild incomeClassifications
+        
+        Set element = dom.createElement("classificationType")
+        incomeClassifications.appendChild element
+        element.Text = "E3_106"
+        
     Next detailLine
     
     'Invoice > Summary
@@ -429,10 +460,11 @@ Private Sub CreateRequestBody(issuerArray, counterPartArray, paymentMethodArray,
     invoiceSummary.appendChild element
     element.Text = invoiceSummaryArray(7)
 
-    'Export
     dom.save ("d:\API Client\Export.xml")
     
-End Sub
+    CreateRequestBody = dom.xml
+   
+End Function
 
 
 Private Sub cmdCreate_Click()
@@ -456,21 +488,24 @@ Private Sub cmdCreateMyData_Click()
 
     Dim myMSXML
     Dim textJSON
+    Dim body As String
     
     Set myMSXML = CreateObject("Microsoft.XmlHttp")
     
-    textJSON = "{ ""abbreviation"":""new.."", ""description"":""new from vb.."",""isActive"":""true"",""userId"":""e7e014fd-5608-4936-866e-ec11fc8c16da""}"
+    myMSXML.Open "POST", "https://mydatapi.aade.gr/mydata/SendInvoices", False
     
-    myMSXML.Open "POST", "https://mydata-dev.azure-api.net/SendInvoices", False
+    myMSXML.SetRequestHeader "aade-user-id", "krotsismepe"
+    myMSXML.SetRequestHeader "ocp-apim-subscription-key", "e3ab4ffa43f64fc2baee668890d1c804"
     
-    myMSXML.SetRequestHeader "aade-user-id", "krotsisepe"
-    myMSXML.SetRequestHeader "ocp-apim-subscription-key", "1f8476ce37534742886b2009739bd6ad"
+    body = CreateRequestBody(CreateIssuer, CreateCounterPart, CreatePaymentMethod, CreatePaymentMethodDetails, CreateInvoiceHeader, CreateInvoiceDetails, CreateInvoiceSummary)
+    
+    Debug.Print body
     
     'strSend = "<?xml version='1.0' encoding='utf-8'?><sysbus><auth><key>ABC123</key></auth></sysbus>"
     
-    myMSXML.Send textJSON
+    'myMSXML.Send textJSON
     
-    MsgBox myMSXML.ResponseText
+    'MsgBox myMSXML.ResponseText
 
 End Sub
 
@@ -504,13 +539,11 @@ End Sub
 
 Private Sub createXML_Click()
 
-    CreateRequestBody _
-        CreateIssuer, _
-        CreateCounterPart, _
-        CreatePaymentMethod, _
-        CreateInvoiceHeader, _
-        CreateInvoiceDetails, _
-        CreateInvoiceSummary
+    Dim result As String
+    
+    result = CreateRequestBody(CreateIssuer, CreateCounterPart, CreatePaymentMethod, CreatePaymentMethodDetails, CreateInvoiceHeader, CreateInvoiceDetails, CreateInvoiceSummary)
+    
+    Debug.Print result
 
 End Sub
 
